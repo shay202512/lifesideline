@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人生支线事务所 — 把平凡日常，玩成RPG长线游戏</title>
+<style>
+/* ===== CSS 变量 / 马卡龙治愈风主题 ===== */
+:root {
+  --bg-deep: #fef5f0;
+  --bg-primary: #fef9f6;
+  --bg-secondary: #fff5f0;
+  --bg-card: #ffffff;
+  --bg-elevated: #fffaf7;
+  --bg-input: #ffffff;
+  --border: #f0d8d8;
+  --border-glow: #f5c6d0;
+  --accent-main: #ff9a9e;
+  --accent-main-dim: rgba(255,154,158,0.15);
+  --accent-sub: #fda085;
+  --accent-yellow: #ffd166;
+  --text-primary: #5c5252;
+  --text-secondary: #998b8b;
+  --text-muted: #c4b5b5;
+  --success: #7ecba1;
+  --danger: #ff8a80;
+  --danger-bg: rgba(255,138,128,0.1);
+  /* 分类色 — 马卡龙 */
+  --cat-skill: #87ceeb;
+  --cat-experience: #b8a9e8;
+  --cat-food: #ffb347;
+  --cat-healing: #7ecba1;
+  --cat-challenge: #ff8a80;
+  --cat-bond: #ffb5c2;
+  --cat-archive: #c4b5b5;
+  /* 阴影 — 柔和轻量 */
+  --shadow-panel: 0 2px 16px rgba(255,154,158,0.08), 0 1px 4px rgba(0,0,0,0.02);
+  --shadow-glow: 0 0 20px rgba(255,154,158,0.12);
+  --shadow-card-hover: 0 4px 20px rgba(255,154,158,0.12);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+  --font: "PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans SC",sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* 背景纹理 */
+body::before {
+  content: '';
+  position: fixed; top:0; left:0; right:0; bottom:0;
+  background: radial-gradient(ellipse at 15% 15%, rgba(255,181,194,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 40%, rgba(184,169,232,0.06) 0%, transparent 55%),
+              radial-gradient(ellipse at 50% 85%, rgba(126,203,161,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 90% 80%, rgba(253,160,133,0.05) 0%, transparent 50%);
+  pointer-events: none; z-index:0;
+}
+
+/* ===== 顶部导航 ===== */
+.header {
+  position: sticky; top:0; z-index:100;
+  background: rgba(255,250,247,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 1100px; margin:0 auto; padding:12px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.brand { display:flex; align-items:center; gap:10px; }
+.brand-icon { font-size:28px; }
+.brand-text h1 { font-size:18px; color:var(--accent-main); font-weight:700; letter-spacing:0.5px; }
+.brand-text span { font-size:11px; color:var(--text-muted); display:block; margin-top:-2px; }
+.nav { display:flex; gap:2px; flex-wrap:wrap; }
+.nav-btn {
+  background:none; border:none; color:var(--text-secondary); font-family:var(--font);
+  font-size:12.5px; padding:7px 13px; border-radius:var(--radius-sm); cursor:pointer;
+  transition:var(--transition); white-space:nowrap;
+}
+.nav-btn:hover { color:var(--accent-main); background:var(--accent-main-dim); }
+.nav-btn.active { color:var(--accent-main); background:var(--accent-main-dim); font-weight:600; }
+.nav-btn .nav-icon { margin-right:4px; }
+
+/* ===== 主内容区 ===== */
+.main { max-width:1100px; margin:0 auto; padding:24px 20px 60px; position:relative; z-index:1; }
+.view { display:none; }
+.view.active { display:block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* ===== 通用组件 ===== */
+.card {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px 22px;
+  box-shadow: var(--shadow-panel);
+  transition:var(--transition);
+}
+.card:hover { border-color:var(--border-glow); box-shadow:var(--shadow-card-hover); transform:translateY(-2px); }
+
+.btn {
+  display:inline-flex; align-items:center; gap:6px; font-family:var(--font);
+  font-size:13px; padding:10px 20px; border-radius:20px;
+  border:1.5px solid var(--border); cursor:pointer; transition:var(--transition);
+  background:var(--bg-elevated); color:var(--text-primary); white-space:nowrap;
+  font-weight:500;
+}
+.btn:hover { border-color:var(--accent-main); color:var(--accent-main); background:var(--accent-main-dim); }
+.btn-primary { background:var(--accent-main); color:#fff; border-color:var(--accent-main); font-weight:600; }
+.btn-primary:hover { background:#ffb5c2; color:#fff; }
+.btn-success { background:var(--success); color:#fff; border-color:var(--success); font-weight:600; }
+.btn-success:hover { background:#93d8b2; }
+.btn-danger { color:var(--danger); border-color:var(--danger); }
+.btn-danger:hover { background:var(--danger-bg); }
+.btn-sm { font-size:11px; padding:5px 10px; }
+.btn-xs { font-size:10px; padding:3px 8px; border-radius:4px; }
+.btn-icon { width:34px; height:34px; padding:0; justify-content:center; border-radius:50%; }
+
+/* 可爱图标悬停动画 */
+.brand-icon, .nav-icon, .hero-icon, .quest-icon, .achievement-icon, .empty-icon, .backup-icon {
+  display:inline-block; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.brand-icon:hover, .nav-icon:hover, .hero-icon:hover, .quest-icon:hover,
+.achievement-icon:hover, .empty-icon:hover, .backup-icon:hover {
+  transform: scale(1.2) rotate(5deg);
+}
+@keyframes gentleBounce {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-4px); }
+}
+.hero-icon { animation: gentleBounce 2.5s ease-in-out infinite; }
+
+/* 分类标签色 */
+.tag {
+  display:inline-block; font-size:10px; padding:2px 8px; border-radius:10px;
+  font-weight:600; letter-spacing:0.5px;
+}
+.tag-skill { background:rgba(135,206,235,0.15); color:var(--cat-skill); }
+.tag-experience { background:rgba(184,169,232,0.15); color:var(--cat-experience); }
+.tag-food { background:rgba(255,179,71,0.15); color:var(--cat-food); }
+.tag-healing { background:rgba(126,203,161,0.15); color:var(--cat-healing); }
+.tag-challenge { background:rgba(255,138,128,0.15); color:var(--cat-challenge); }
+.tag-bond { background:rgba(255,181,194,0.15); color:var(--cat-bond); }
+.tag-archive { background:rgba(196,181,181,0.2); color:var(--cat-archive); }
+.tag-custom { background:rgba(255,154,158,0.12); color:var(--accent-sub); }
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px; font-size:10.5px; padding:3px 10px;
+  border-radius:10px; font-weight:600;
+}
+.badge-active { background:rgba(135,206,235,0.12); color:var(--cat-skill); }
+.badge-completed { background:rgba(126,203,161,0.12); color:var(--success); }
+.badge-archived { background:rgba(196,181,181,0.15); color:var(--text-muted); }
+
+.stars { display:inline-flex; gap:1px; color:var(--accent-main); font-size:13px; letter-spacing:1px; }
+.stars .empty { color:var(--text-muted); opacity:0.3; }
+
+.section-title {
+  font-size:20px; font-weight:700; color:var(--accent-main); margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-subtitle { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+
+/* ===== 弹窗 / 模态框 ===== */
+.modal-overlay {
+  position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.3);
+  display:flex; align-items:center; justify-content:center;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.hidden { display:none; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.modal {
+  background:var(--bg-primary); border:1px solid var(--border-glow);
+  border-radius:var(--radius); padding:28px; width:92%; max-width:520px; max-height:85vh;
+  overflow-y:auto; box-shadow: 0 8px 48px rgba(0,0,0,0.1);
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn { from { opacity:0; transform:translateY(20px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+.modal h3 { font-size:18px; color:var(--accent-main); margin-bottom:20px; text-align:center; }
+.modal-close {
+  position:absolute; top:12px; right:14px; background:none; border:none;
+  color:var(--text-muted); font-size:20px; cursor:pointer; padding:4px; line-height:1;
+}
+.modal-close:hover { color:var(--text-primary); }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+/* 表单 */
+.form-group { margin-bottom:14px; }
+.form-group label { display:block; font-size:12px; color:var(--text-secondary); margin-bottom:5px; font-weight:600; }
+.form-group input, .form-group select, .form-group textarea {
+  width:100%; padding:10px 12px; background:var(--bg-input); border:1px solid var(--border);
+  border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font);
+  font-size:13px; outline:none; transition:var(--transition);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color:var(--accent-main); box-shadow:0 0 8px rgba(255,154,158,0.2);
+}
+.form-group textarea { resize:vertical; min-height:70px; }
+.form-group select { cursor:pointer; }
+.form-group select option { background:var(--bg-primary); color:var(--text-primary); }
+
+/* 难度星级选择器 */
+.star-select { display:flex; gap:6px; }
+.star-select .star-btn {
+  background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted);
+  transition:var(--transition); padding:0;
+}
+.star-select .star-btn.active { color:var(--accent-main); }
+.star-select .star-btn:hover { color:var(--accent-main); transform:scale(1.15); }
+
+/* 标签选择器 */
+.tag-select { display:flex; flex-wrap:wrap; gap:6px; }
+.tag-select .tag-option {
+  font-size:11px; padding:4px 12px; border-radius:12px; cursor:pointer;
+  border:1px solid var(--border); background:transparent; color:var(--text-secondary);
+  transition:var(--transition); font-family:var(--font);
+}
+.tag-select .tag-option.selected { background:var(--accent-main-dim); border-color:var(--accent-main); color:var(--accent-main); }
+
+/* ===== 首页 / Hero ===== */
+.hero {
+  text-align:center; padding:40px 20px 32px;
+  border-bottom:1px solid var(--border); margin-bottom:28px;
+}
+.hero-icon { font-size:48px; margin-bottom:12px; }
+.hero h2 { font-size:32px; font-weight:800; color:var(--accent-main); letter-spacing:1px; margin-bottom:8px; }
+.hero p { font-size:15px; color:var(--text-secondary); max-width:500px; margin:0 auto; }
+
+/* 进度面板 */
+.progress-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+.progress-item { text-align:center; }
+.progress-item .num { font-size:28px; font-weight:800; color:var(--accent-main); }
+.progress-item .label { font-size:11px; color:var(--text-muted); margin-top:2px; }
+.progress-item.completed .num { color:var(--success); }
+.progress-item.archived .num { color:var(--text-muted); }
+
+/* 推荐卡片 */
+.recommend-card {
+  background:linear-gradient(135deg, rgba(255,181,194,0.15), rgba(253,160,133,0.1));
+  border:1.5px solid rgba(255,181,194,0.25); padding:18px 20px;
+  border-radius:var(--radius); margin-bottom:20px;
+}
+.recommend-card .rec-label { font-size:11px; color:var(--accent-sub); font-weight:600; margin-bottom:4px; }
+.recommend-card .rec-text { font-size:15px; color:var(--text-primary); font-weight:600; }
+.recommend-card .rec-hint { font-size:11px; color:var(--text-muted); margin-top:6px; }
+
+/* 快捷按钮 */
+.quick-actions { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+
+/* 温柔提示 */
+.gentle-tip {
+  background:rgba(126,203,161,0.1); border:1.5px solid rgba(126,203,161,0.15);
+  padding:14px 18px; border-radius:var(--radius); text-align:center;
+  font-size:13px; color:var(--text-secondary); margin-top:20px; font-weight:500;
+  animation: gentleFade 5s ease-in-out infinite alternate;
+}
+@keyframes gentleFade { from { opacity:0.7; } to { opacity:1; } }
+
+/* ===== 支线图鉴 ===== */
+.filter-bar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; }
+.filter-btn {
+  background:#fff; border:1.5px solid var(--border); color:var(--text-secondary);
+  font-family:var(--font); font-size:12px; padding:6px 16px; border-radius:20px;
+  cursor:pointer; transition:var(--transition); font-weight:500;
+}
+.filter-btn:hover { border-color:var(--accent-main); color:var(--accent-main); background:var(--accent-main-dim); }
+.filter-btn.active { background:var(--accent-main); border-color:var(--accent-main); color:#fff; }
+
+.quest-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:14px; }
+.quest-card { position:relative; }
+.quest-card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; }
+.quest-card-name { font-size:15px; font-weight:700; flex:1; }
+.quest-card-meta { display:flex; gap:6px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+.quest-card-desc { font-size:12px; color:var(--text-muted); margin-bottom:12px; line-height:1.5; }
+.quest-card-tags { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px; }
+.quest-card-actions { display:flex; gap:6px; flex-wrap:wrap; }
+.quest-card.completed { opacity:0.8; border-color:rgba(126,203,161,0.25); }
+.quest-card.archived { opacity:0.6; border-color:rgba(196,181,181,0.3); }
+
+/* 浮动按钮 */
+.fab {
+  position:fixed; bottom:28px; right:28px; z-index:99;
+  width:52px; height:52px; border-radius:50%; background:var(--accent-main);
+  color:#fff; border:none; font-size:26px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(255,154,158,0.3); transition:var(--transition);
+}
+.fab:hover { transform:scale(1.08); box-shadow:0 6px 28px rgba(255,154,158,0.45); }
+
+/* 空状态 */
+.empty-state { text-align:center; padding:50px 20px; color:var(--text-muted); }
+.empty-state .empty-icon { font-size:48px; display:block; margin-bottom:12px; }
+.empty-state p { font-size:14px; }
+
+/* ===== 成就勋章墙 ===== */
+.achievement-series { margin-bottom:28px; }
+.achievement-series h4 { font-size:14px; color:var(--accent-sub); margin-bottom:12px; padding-left:2px; }
+.achievement-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
+.achievement-item {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px 14px; text-align:center; transition:var(--transition);
+}
+.achievement-item.unlocked { border-color:rgba(255,154,158,0.4); background:linear-gradient(135deg, rgba(255,154,158,0.12), rgba(253,160,133,0.06)); }
+.achievement-item.locked { opacity:0.5; filter:grayscale(0.3); }
+.achievement-icon { font-size:32px; margin-bottom:6px; display:block; }
+.achievement-name { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:3px; }
+.achievement-item.locked .achievement-name { color:var(--text-muted); }
+.achievement-cond { font-size:10.5px; color:var(--text-muted); }
+.achievement-item.unlocked .achievement-cond { color:var(--accent-sub); }
+
+/* ===== 时光回忆录 ===== */
+.timeline { position:relative; padding-left:30px; }
+.timeline::before {
+  content:''; position:absolute; left:8px; top:0; bottom:0;
+  width:2px; background:linear-gradient(to bottom, var(--accent-main), var(--border));
+}
+.timeline-item { position:relative; margin-bottom:20px; padding-left:10px; }
+.timeline-item::before {
+  content:''; position:absolute; left:-27px; top:6px;
+  width:12px; height:12px; border-radius:50%; background:var(--accent-main);
+  border:2px solid var(--bg-primary); box-shadow:0 0 8px rgba(255,154,158,0.3);
+}
+.timeline-date { font-size:11px; color:var(--accent-sub); font-weight:600; margin-bottom:4px; }
+.timeline-content { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
+.timeline-content .tl-name { font-size:14px; font-weight:700; margin-bottom:4px; }
+.timeline-content .tl-notes { font-size:12px; color:var(--text-secondary); line-height:1.5; }
+
+/* ===== 随机支线 ===== */
+.random-section { text-align:center; padding:30px 0; }
+.random-btn {
+  background:linear-gradient(135deg, var(--accent-main), #fda085); color:#fff;
+  border:none; font-family:var(--font); font-size:16px; font-weight:700; padding:14px 36px;
+  border-radius:28px; cursor:pointer; transition:var(--transition);
+  box-shadow:0 4px 20px rgba(255,154,158,0.25); margin-bottom:20px;
+}
+.random-btn:hover { transform:translateY(-2px); box-shadow:0 6px 30px rgba(255,154,158,0.4); }
+.random-btn:active { transform:translateY(0); }
+.random-btn.spinning { animation: spinShake 0.6s ease; }
+@keyframes spinShake {
+  0% { transform:rotate(0); }
+  25% { transform:rotate(3deg) scale(1.05); }
+  50% { transform:rotate(-3deg) scale(1.08); }
+  75% { transform:rotate(2deg) scale(1.03); }
+  100% { transform:rotate(0) scale(1); }
+}
+.random-result { animation: resultPop 0.4s ease; }
+@keyframes resultPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+.random-result .result-quest { font-size:18px; font-weight:700; margin-bottom:8px; color:var(--accent-main); }
+
+/* ===== 存档备份 ===== */
+.backup-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+.backup-card { text-align:center; }
+.backup-card .backup-icon { font-size:36px; display:block; margin-bottom:10px; }
+.backup-card h4 { font-size:14px; margin-bottom:6px; }
+.backup-card p { font-size:11px; color:var(--text-muted); margin-bottom:14px; }
+
+/* 年度报告 */
+.annual-report { margin-top:28px; }
+.report-preview {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:24px; max-width:600px; margin:0 auto;
+}
+.report-preview h3 { font-size:20px; text-align:center; color:var(--accent-main); margin-bottom:20px; }
+.report-stat { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+.report-stat .stat-label { color:var(--text-secondary); font-size:13px; }
+.report-stat .stat-value { color:var(--accent-main); font-size:15px; font-weight:700; }
+.report-ending { text-align:center; font-size:14px; color:var(--success); margin-top:20px; font-style:italic; }
+
+/* ===== 响应式 ===== */
+@media (max-width:768px) {
+  .header-inner { flex-direction:column; gap:10px; padding:10px 14px; }
+  .nav { justify-content:center; }
+  .nav-btn { font-size:11px; padding:5px 9px; }
+  .hero h2 { font-size:24px; }
+  .progress-grid { grid-template-columns:repeat(2,1fr); }
+  .quest-grid { grid-template-columns:1fr; }
+  .achievement-grid { grid-template-columns:repeat(2,1fr); }
+  .quick-actions { justify-content:center; }
+  .fab { bottom:18px; right:18px; width:46px; height:46px; font-size:22px; }
+  .modal { padding:20px; }
+}
+/* ===== 汉堡菜单按钮（移动端） ===== */
+.hamburger {
+  display:none; background:none; border:none; font-size:24px;
+  color:var(--accent-main); cursor:pointer; padding:6px 8px;
+  border-radius:var(--radius-sm); transition:var(--transition);
+}
+.hamburger:hover { background:var(--accent-main-dim); }
+
+/* ===== 移动端适配 ===== */
+@media (max-width:768px) {
+  .hamburger { display:block; }
+  .header-inner { flex-wrap:wrap; padding:10px 14px; }
+  .brand-text h1 { font-size:16px; }
+  .brand-text span { font-size:10px; display:none; }
+  .brand-icon { font-size:24px; }
+
+  .nav {
+    display:none; width:100%; flex-direction:column; gap:1px;
+    padding-top:10px; order:3;
+  }
+  .nav.open { display:flex; }
+  .nav-btn { width:100%; text-align:left; padding:10px 12px; font-size:14px; border-radius:var(--radius-sm); }
+  .nav-btn .nav-icon { font-size:16px; margin-right:8px; }
+
+  .main { padding:16px 12px 80px; }
+
+  .hero { padding:28px 12px 24px; }
+  .hero h2 { font-size:21px; letter-spacing:0; }
+
+  .progress-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .progress-item .num { font-size:24px; }
+  .progress-item { padding:14px 10px; }
+
+  .quest-grid { grid-template-columns:1fr; }
+  .quest-card { padding:14px 16px; }
+
+  .filter-bar { gap:4px; }
+  .filter-btn { font-size:11px; padding:5px 10px; }
+
+  .achievement-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .achievement-item { padding:12px 10px; }
+  .achievement-icon { font-size:26px; }
+
+  .quick-actions { flex-direction:column; }
+  .quick-actions .btn { width:100%; justify-content:center; }
+
+  .modal { width:95%; padding:20px; max-height:90vh; }
+  .modal h3 { font-size:16px; }
+
+  .fab { bottom:20px; right:16px; width:46px; height:46px; font-size:22px; }
+
+  .backup-grid { grid-template-columns:1fr; }
+  .backup-card { padding:20px 16px; }
+
+  .timeline-item { flex-direction:column; gap:8px; }
+  .timeline-date { min-width:auto; text-align:left; }
+
+  .random-btn { width:100%; font-size:15px; padding:20px; }
+  .random-result { padding:20px 14px; }
+
+  .section-title { font-size:17px; }
+  .card { padding:16px; }
+
+  .star-select .star-btn { font-size:20px; }
+  .tag-select .tag-option { font-size:10px; padding:3px 10px; }
+}
+
+@media (max-width:480px) {
+  .hero h2 { font-size:18px; }
+  .hero p { font-size:13px; }
+  .hero-icon { font-size:36px; }
+  .achievement-grid { grid-template-columns:1fr 1fr; }
+  .backup-grid { grid-template-columns:1fr; }
+  .progress-item .num { font-size:22px; }
+  .progress-item .label { font-size:10px; }
+  .brand-text h1 { font-size:15px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-icon">🌸</span>
+      <div class="brand-text">
+        <h1>人生支线事务所</h1>
+        <span>把平凡日常，玩成RPG长线游戏</span>
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="菜单">☰</button>
+    <nav class="nav" id="nav">
+      <button class="nav-btn active" data-view="home"><span class="nav-icon">🏠</span>主线总览</button>
+      <button class="nav-btn" data-view="quests"><span class="nav-icon">📔</span>支线图鉴</button>
+      <button class="nav-btn" data-view="achievements"><span class="nav-icon">🌟</span>成就勋章墙</button>
+      <button class="nav-btn" data-view="timeline"><span class="nav-icon">📔</span>时光回忆录</button>
+      <button class="nav-btn" data-view="random"><span class="nav-icon">🎪</span>随机新支线</button>
+      <button class="nav-btn" data-view="backup"><span class="nav-icon">☁️</span>存档备份</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== 主内容 ===== -->
+<main class="main" id="mainContent">
+  <!-- 所有视图由 JS 动态渲染 -->
+</main>
+
+<!-- ===== 浮动新建按钮 ===== -->
+<button class="fab hidden" id="fabAdd" title="新建支线任务">+</button>
+
+<!-- ===== 模态框容器 ===== -->
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+/* ================================================================
+   人生支线事务所 — 核心 JS 引擎
+   ================================================================ */
+
+// ============ 数据层 ============
+const LS_KEY_QUESTS = 'lifeside_quests';
+const LS_KEY_SETTINGS = 'lifeside_settings';
+const CURRENT_VERSION = 1;
+
+function uid() {
+  return 'q_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
+}
+
+function loadQuests() {
+  try {
+    const raw = localStorage.getItem(LS_KEY_QUESTS);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function saveQuests(quests) {
+  localStorage.setItem(LS_KEY_QUESTS, JSON.stringify(quests));
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(LS_KEY_SETTINGS);
+    const s = raw ? JSON.parse(raw) : {};
+    return { reportExports:0, ...s, version: s.version || 0 };
+  } catch (e) { return { reportExports:0, version:0 }; }
+}
+
+function saveSettings(settings) {
+  localStorage.setItem(LS_KEY_SETTINGS, JSON.stringify(settings));
+}
+
+// ============ 预置数据 ============
+const PREPOPULATED_QUESTS = [
+  // 技能支线
+  { name:'学会烘焙', category:'skill', difficulty:3, season:'any', budget:'small', tags:['技能'], description:'从揉面开始，做出一炉香喷喷的面包或蛋糕', repeatCycle:'once', difficulty:3 },
+  { name:'流利口语', category:'skill', difficulty:4, season:'any', budget:'small', tags:['技能'], description:'能用一门外语进行日常流利对话', repeatCycle:'once', difficulty:4 },
+  { name:'剪辑视频', category:'skill', difficulty:3, season:'any', budget:'free', tags:['技能'], description:'学会用剪辑软件制作一段完整视频', repeatCycle:'once', difficulty:3 },
+  { name:'独立修车', category:'skill', difficulty:3, season:'any', budget:'small', tags:['技能'], description:'能自己动手完成基础的汽车保养和小修', repeatCycle:'once', difficulty:3 },
+  { name:'弹一首完整曲子', category:'skill', difficulty:4, season:'any', budget:'free', tags:['技能'], description:'在某个乐器上完整演奏一首喜欢的曲子', repeatCycle:'once', difficulty:4 },
+  // 体验支线
+  { name:'独自看海', category:'experience', difficulty:2, season:'summer', budget:'small', tags:['独处'], description:'一个人去海边，什么都不做，就静静看海', repeatCycle:'once', difficulty:2 },
+  { name:'深夜看星星', category:'experience', difficulty:1, season:'summer', budget:'free', tags:['独处','治愈'], description:'找一个晴朗夜晚，远离光污染看满天繁星', repeatCycle:'once', difficulty:1 },
+  { name:'看一场线下演唱会', category:'experience', difficulty:2, season:'any', budget:'large', tags:['体验'], description:'去现场感受一次音乐的力量', repeatCycle:'once', difficulty:2 },
+  { name:'短途独行', category:'experience', difficulty:2, season:'any', budget:'small', tags:['独处','冒险'], description:'一个人去附近城市或小镇待一两天', repeatCycle:'once', difficulty:2 },
+  { name:'山顶看日出', category:'experience', difficulty:3, season:'any', budget:'free', tags:['独处','冒险'], description:'凌晨爬到山顶等第一缕阳光', repeatCycle:'once', difficulty:3 },
+  // 美食支线
+  { name:'自制猪肚鸡', category:'food', difficulty:4, season:'winter', budget:'small', tags:['美食'], description:'从备料开始完整复刻这道暖胃好汤', repeatCycle:'once', difficulty:4 },
+  { name:'打卡小众小吃', category:'food', difficulty:2, season:'any', budget:'small', tags:['美食','冒险'], description:'发现并尝试本地不为人知的小吃店', repeatCycle:'once', difficulty:2 },
+  { name:'尝试异国料理', category:'food', difficulty:3, season:'any', budget:'small', tags:['美食'], description:'去一家正宗的异国餐厅或自己动手做', repeatCycle:'once', difficulty:3 },
+  { name:'亲手做甜品', category:'food', difficulty:2, season:'any', budget:'small', tags:['美食','治愈'], description:'烤一个蛋糕或做一道精致甜点，犒劳自己', repeatCycle:'once', difficulty:2 },
+  // 治愈支线
+  { name:'完整读完一本书', category:'healing', difficulty:2, season:'any', budget:'free', tags:['治愈'], description:'放下手机，安静地把一整本书读完', repeatCycle:'once', difficulty:2 },
+  { name:'养一盆开花绿植', category:'healing', difficulty:2, season:'spring', budget:'small', tags:['治愈'], description:'从种子开始养一盆植物，等它开花', repeatCycle:'once', difficulty:2 },
+  { name:'撸猫一整天', category:'healing', difficulty:1, season:'any', budget:'free', tags:['治愈'], description:'什么都不做，就和猫待一整天', repeatCycle:'once', difficulty:1 },
+  { name:'泡一次热汤', category:'healing', difficulty:1, season:'winter', budget:'small', tags:['治愈'], description:'找一处温泉或泡一个热水澡，彻底放松', repeatCycle:'once', difficulty:1 },
+  // 挑战支线
+  { name:'5km慢跑', category:'challenge', difficulty:3, season:'any', budget:'free', tags:['挑战'], description:'坚持跑完5公里，不追求速度', repeatCycle:'weekly', difficulty:3 },
+  { name:'当众发言', category:'challenge', difficulty:4, season:'any', budget:'free', tags:['挑战'], description:'在会议上或公共场合大胆说出自己的想法', repeatCycle:'once', difficulty:4 },
+  { name:'独自看电影', category:'challenge', difficulty:2, season:'any', budget:'small', tags:['挑战','独处'], description:'一个人去电影院，享受独处的观影时光', repeatCycle:'once', difficulty:2 },
+  { name:'勇敢拒绝内耗', category:'challenge', difficulty:5, season:'any', budget:'free', tags:['挑战','治愈'], description:'对消耗自己的人和事说"不"', repeatCycle:'once', difficulty:5 },
+  // 羁绊支线
+  { name:'和闺蜜短途旅行', category:'bond', difficulty:3, season:'any', budget:'small', tags:['双人','冒险'], description:'和最好的朋友来一场说走就走的小旅行', repeatCycle:'once', difficulty:3 },
+  { name:'给家人写一封信', category:'bond', difficulty:1, season:'any', budget:'free', tags:['双人','治愈'], description:'用纸笔给家人写一封真诚的信', repeatCycle:'once', difficulty:1 },
+  { name:'和伴侣打卡美食', category:'bond', difficulty:2, season:'any', budget:'small', tags:['双人','美食'], description:'两个人一起去探索好吃的地方', repeatCycle:'once', difficulty:2 },
+];
+
+// 随机支线库
+const RANDOM_QUESTS = [
+  '找一个晴天出门散步，不带手机很久',
+  '尝试一道从没做过的家常菜',
+  '傍晚出门看一次日落',
+  '整理房间，给自己打造舒适小角落',
+  '给很久没联系的好友发一段暖心消息',
+  '安静读完半本书，不刷手机',
+  '尝试一款全新饮品',
+  '学一首自己喜欢的外语歌曲',
+  '给明天的自己写一张明信片',
+  '把手机调成黑白模式过一天',
+  '去花市买一束鲜花放在书桌上',
+  '用纸笔写一篇日记，记录今天的感受',
+  '清理手机里半年没用过的App',
+  '尝试冥想或正念呼吸10分钟',
+  '逛一家从未进过的小店',
+];
+
+// 分类信息
+const CATEGORIES = {
+  skill:    { name:'技能支线·成长副本',   desc:'解锁新能力，给自己叠加永久buff',          icon:'🪄', color:'var(--cat-skill)' },
+  experience:{ name:'体验支线·奇遇地图',   desc:'奔赴各种只属于自己的独特经历',            icon:'🎪', color:'var(--cat-experience)' },
+  food:     { name:'美食支线·味蕾图鉴',   desc:'尝遍人间风味，记录好吃瞬间',              icon:'🍰', color:'var(--cat-food)' },
+  healing:  { name:'治愈支线·休憩副本',   desc:'安抚情绪，留给自己松弛时间',              icon:'🧸', color:'var(--cat-healing)' },
+  challenge:{ name:'挑战支线·勇者试炼',   desc:'突破舒适区，完成小小自我挑战',            icon:'💪', color:'var(--cat-challenge)' },
+  bond:     { name:'羁绊支线·同行任务',   desc:'和重要的人一起解锁双人支线',              icon:'💕', color:'var(--cat-bond)' },
+  archived: { name:'遗憾存档区',           desc:'暂时无法完成，不必删除，留作温柔纪念',    icon:'🕯️', color:'var(--cat-archive)' },
+};
+
+// 成就定义
+const ACHIEVEMENTS = [
+  { series:'新手系列', icon:'🌱', id:'first_quest',       name:'初入冒险',     cond:'完成第一条支线',                   check: (q)=>countCompleted(q)>=1 },
+  { series:'新手系列', icon:'🌟', id:'quests_5',          name:'小小探险家',   cond:'累计完成5条支线',                  check: (q)=>countCompleted(q)>=5 },
+  { series:'新手系列', icon:'🎀', id:'created_10',        name:'任务收藏家',   cond:'创建10条待解锁支线',               check: (q)=>q.length>=10 },
+  { series:'美食系列', icon:'🍬', id:'food_5',            name:'味蕾新手',     cond:'打卡5道特色美食',                  check: (q)=>countCompletedByCat(q,'food')>=5 },
+  { series:'美食系列', icon:'🌺', id:'food_20',           name:'美食漫游者',   cond:'20种不同风味体验',                 check: (q)=>countCompletedByCat(q,'food')>=20 },
+  { series:'美食系列', icon:'👑', id:'food_50',           name:'人间食客',     cond:'50次美食支线打卡',                 check: (q)=>countCompletedByCat(q,'food')>=50 },
+  { series:'成长技能系列', icon:'📚', id:'skill_1',       name:'学徒起步',     cond:'掌握第一项新技能',                 check: (q)=>countCompletedByCat(q,'skill')>=1 },
+  { series:'成长技能系列', icon:'🎨', id:'skill_3',       name:'多才之人',     cond:'解锁3项不同技能',                  check: (q)=>countCompletedByCat(q,'skill')>=3 },
+  { series:'成长技能系列', icon:'🏆', id:'skill_10',      name:'终身学习者',   cond:'10个技能支线完成',                 check: (q)=>countCompletedByCat(q,'skill')>=10 },
+  { series:'独行体验系列', icon:'🌷', id:'exp_3',         name:'独行旅人',     cond:'3次独自出行体验',                  check: (q)=>countCompletedByCat(q,'experience')>=3 },
+  { series:'独行体验系列', icon:'🎠', id:'exp_10',        name:'自由漫游者',   cond:'10次单人奇遇支线',                 check: (q)=>countCompletedByCat(q,'experience')>=10 },
+  { series:'独行体验系列', icon:'🌈', id:'exp_20',        name:'山河览客',     cond:'走遍多种风景体验',                 check: (q)=>countCompletedByCat(q,'experience')>=20 },
+  { series:'治愈松弛系列', icon:'🫧', id:'heal_10',       name:'温柔自愈家',   cond:'10条治愈支线完成',                 check: (q)=>countCompletedByCat(q,'healing')>=10 },
+  { series:'治愈松弛系列', icon:'🦋', id:'heal_30',       name:'生活观察员',   cond:'收集30件治愈小事',                 check: (q)=>countCompletedByCat(q,'healing')>=30 },
+  { series:'羁绊双人系列', icon:'💞', id:'bond_1',        name:'同行好友',     cond:'完成第一条双人支线',               check: (q)=>countCompletedByCat(q,'bond')>=1 },
+  { series:'羁绊双人系列', icon:'💝', id:'bond_10',       name:'羁绊同行者',   cond:'和他人共同完成10次任务',           check: (q)=>countCompletedByCat(q,'bond')>=10 },
+  { series:'全收集终极',   icon:'🎪', id:'all_cats',      name:'人生玩家',     cond:'全分类支线均有完成记录',           check: (q)=>['skill','experience','food','healing','challenge','bond'].every(c=>countCompletedByCat(q,c)>=1) },
+  { series:'全收集终极',   icon:'🏅', id:'total_100',     name:'时光收藏家',   cond:'累计100条完成支线',                check: (q)=>countCompleted(q)>=100 },
+  { series:'全收集终极',   icon:'📚', id:'report_3',      name:'岁月存档者',   cond:'导出3次年度人生报告书',           check: (q,s)=>((s||{}).reportExports||0)>=3 },
+];
+
+// 温柔提示
+const GENTLE_TIPS = [
+  '支线没有完成期限，晚一点也没关系',
+  '搁置不是失败，只是换个时机再相遇',
+  '不用逼自己大量打卡，记录本身就是意义',
+  '不必和他人对比人生支线，每个人地图不同',
+  '微小的小事，也值得被认真存档记录',
+];
+
+// ============ 辅助函数 ============
+function countCompleted(quests) { return quests.filter(q=>q.status==='completed').length; }
+function countActive(quests) { return quests.filter(q=>q.status==='active').length; }
+function countArchived(quests) { return quests.filter(q=>q.status==='archived').length; }
+function countCompletedByCat(quests, cat) { return quests.filter(q=>q.status==='completed' && q.category===cat).length; }
+
+function categoryLabel(cat) {
+  const m = CATEGORIES[cat];
+  return m ? m.name : cat;
+}
+function categoryIcon(cat) {
+  const m = CATEGORIES[cat];
+  return m ? m.icon : '📌';
+}
+function difficultyStars(n) {
+  let s = ''; for (let i=1;i<=5;i++) s += i<=n ? '★' : '<span class="empty">★</span>';
+  return s;
+}
+function seasonLabel(s) {
+  const m = { spring:'🌸春', summer:'☀️夏', autumn:'🍂秋', winter:'❄️冬', any:'全年不限' };
+  return m[s] || s;
+}
+function budgetLabel(b) {
+  const m = { free:'无花费', small:'小额', large:'大额存钱计划' };
+  return m[b] || b || '未填写';
+}
+function repeatLabel(r) {
+  const m = { once:'一次性支线', weekly:'每周循环', yearly:'每年打卡' };
+  return m[r] || r;
+}
+function statusBadge(status) {
+  if (status==='completed') return '<span class="badge badge-completed">✅ 已完成</span>';
+  if (status==='archived') return '<span class="badge badge-archived">🕯️ 已存档</span>';
+  return '<span class="badge badge-active">⚡ 进行中</span>';
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
+}
+function isThisYear(isoStr) {
+  if (!isoStr) return false;
+  return new Date(isoStr).getFullYear() === new Date().getFullYear();
+}
+
+// ============ 数据初始化 ============
+function initData() {
+  let quests = loadQuests();
+  if (!quests || !Array.isArray(quests)) {
+    quests = PREPOPULATED_QUESTS.map(q => ({
+      id: uid(),
+      name: q.name,
+      category: q.category,
+      difficulty: q.difficulty,
+      season: q.season,
+      budget: q.budget,
+      tags: q.tags,
+      description: q.description,
+      repeatCycle: q.repeatCycle,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+      checkIns: [],
+      isPrepopulated: true,
+    }));
+    saveQuests(quests);
+  }
+  let settings = loadSettings();
+  if (settings.version < CURRENT_VERSION) {
+    settings.version = CURRENT_VERSION;
+    saveSettings(settings);
+  }
+  return { quests, settings };
+}
+
+// ============ UI 状态 ============
+let state = { currentView:'home', currentFilter:'all', quests:[], settings:{} };
+
+function refreshData() {
+  const d = initData();
+  state.quests = d.quests;
+  state.settings = d.settings;
+}
+
+function getQuests() { return state.quests; }
+function getSettings() { return state.settings; }
+
+function showView(viewName) {
+  state.currentView = viewName;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector(`[data-view="${viewName}"]`);
+  if (btn) btn.classList.add('active');
+  refreshData();
+  renderView(viewName);
+  // FAB 控制
+  const fab = document.getElementById('fabAdd');
+  if (viewName==='quests') { fab.classList.remove('hidden'); }
+  else { fab.classList.add('hidden'); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderView(viewName) {
+  const container = document.getElementById('mainContent');
+  switch(viewName) {
+    case 'home': container.innerHTML = renderHome(); break;
+    case 'quests': container.innerHTML = renderQuests(); break;
+    case 'achievements': container.innerHTML = renderAchievements(); break;
+    case 'timeline': container.innerHTML = renderTimeline(); break;
+    case 'random': container.innerHTML = renderRandom(); break;
+    case 'backup': container.innerHTML = renderBackup(); break;
+  }
+}
+
+// ============ 视图渲染 ============
+
+// --- 首页 ---
+function renderHome() {
+  const quests = getQuests();
+  const total = quests.length;
+  const completed = countCompleted(quests);
+  const active = countActive(quests);
+  const archived = countArchived(quests);
+  const activeQuests = quests.filter(q=>q.status==='active');
+  const rec = activeQuests.length > 0
+    ? activeQuests[Math.floor(Math.random()*activeQuests.length)]
+    : null;
+  const tip = GENTLE_TIPS[Math.floor(Math.random()*GENTLE_TIPS.length)];
+
+  let recHTML = '';
+  if (rec) {
+    recHTML = `<div class="recommend-card">
+      <div class="rec-label">🎯 今日适合开启的小支线</div>
+      <div class="rec-text">${categoryIcon(rec.category)} ${escHtml(rec.name)}</div>
+      <div class="rec-hint">${difficultyStars(rec.difficulty)} · ${categoryLabel(rec.category)}</div>
+    </div>`;
+  } else {
+    recHTML = `<div class="recommend-card">
+      <div class="rec-label">🎯 今日推荐</div>
+      <div class="rec-text" style="color:var(--text-secondary)">还没有进行中的支线，去图鉴里创建第一条吧！</div>
+    </div>`;
+  }
+
+  return `
+  <div class="hero">
+    <div class="hero-icon">✨</div>
+    <h2>人生没有标准答案，只有无数待解锁支线</h2>
+    <p>写下想体验的一切，慢慢完成不必着急</p>
+  </div>
+
+  <div class="section-title">📊 你的冒险进度</div>
+  <div class="progress-grid">
+    <div class="progress-item card"><div class="num">${total}</div><div class="label">总任务数</div></div>
+    <div class="progress-item card completed"><div class="num">${completed}</div><div class="label">✅ 已完成</div></div>
+    <div class="progress-item card"><div class="num">${active}</div><div class="label">⚡ 进行中</div></div>
+    <div class="progress-item card archived"><div class="num">${archived}</div><div class="label">💌 遗憾存档</div></div>
+  </div>
+
+  ${recHTML}
+
+  <div class="quick-actions">
+    <button class="btn btn-primary" onclick="openQuestForm()">➕ 新建支线任务</button>
+    <button class="btn btn-success" onclick="quickCheckIn()">✅ 一键打卡完成</button>
+    <button class="btn" onclick="showView('random')">🎪 抽取随机支线</button>
+    <button class="btn" onclick="exportAnnualReport()">📒 导出年度报告书</button>
+  </div>
+
+  <div class="gentle-tip">💚 ${tip}</div>
+  `;
+}
+
+// --- 支线图鉴 ---
+function renderQuests(filterCat) {
+  const cat = filterCat || state.currentFilter || 'all';
+  state.currentFilter = cat;
+  const quests = getQuests();
+  let filtered = quests;
+  if (cat !== 'all') {
+    if (cat === 'archived') filtered = quests.filter(q=>q.status==='archived');
+    else filtered = quests.filter(q=>q.category===cat && q.status!=='archived');
+  }
+
+  const cats = [
+    {key:'all',label:'全部'},
+    {key:'skill',label:'🪄 技能'},
+    {key:'experience',label:'🗺️ 体验'},
+    {key:'food',label:'🍜 美食'},
+    {key:'healing',label:'🌸 治愈'},
+    {key:'challenge',label:'💪 挑战'},
+    {key:'bond',label:'💕 羁绊'},
+    {key:'archived',label:'🕯️ 遗憾存档'},
+  ];
+
+  let filterHTML = cats.map(c=>{
+    const active = cat===c.key ? ' active' : '';
+    return `<button class="filter-btn${active}" onclick="state.currentFilter='${c.key}';renderView('quests')">${c.label}</button>`;
+  }).join('');
+
+  let cardsHTML = '';
+  if (filtered.length === 0) {
+    cardsHTML = `<div class="empty-state"><span class="empty-icon">${cat==='all' ? '📭' : '🗺️'}</span><p>${cat==='all' ? '还没有任何支线，点击右下角 + 开始冒险吧' : '这个分类下暂无支线'}</p></div>`;
+  } else {
+    cardsHTML = filtered.map(q=>{
+      const cardClass = q.status==='completed' ? ' completed' : (q.status==='archived' ? ' archived' : '');
+      const tagClass = 'tag-'+q.category;
+      return `<div class="card quest-card${cardClass}">
+        <div class="quest-card-header">
+          <span class="quest-card-name">${escHtml(q.name)}</span>
+          <span class="tag ${tagClass}">${categoryLabel(q.category)}</span>
+        </div>
+        <div class="quest-card-meta">
+          <span class="stars">${difficultyStars(q.difficulty)}</span>
+          ${statusBadge(q.status)}
+          ${q.checkIns.length > 0 ? `<span style="font-size:10px;color:var(--text-muted)">打卡${q.checkIns.length}次</span>` : ''}
+        </div>
+        ${q.description ? `<div class="quest-card-desc">${escHtml(q.description)}</div>` : ''}
+        <div class="quest-card-tags">
+          ${q.tags.map(t=>`<span class="tag tag-custom">#${escHtml(t)}</span>`).join('')}
+          <span class="tag tag-custom">${seasonLabel(q.season)}</span>
+          <span class="tag tag-custom">${budgetLabel(q.budget)}</span>
+          <span class="tag tag-custom">${repeatLabel(q.repeatCycle)}</span>
+        </div>
+        <div class="quest-card-actions">
+          ${q.status==='active' ? `
+            <button class="btn btn-sm btn-success" onclick="openCheckInModal('${q.id}')">✅ 打卡完成</button>
+            <button class="btn btn-sm" onclick="openQuestForm('${q.id}')">✏️ 编辑</button>
+            <button class="btn btn-sm btn-danger" onclick="archiveQuest('${q.id}')">🕯️ 移至遗憾存档</button>
+          ` : ''}
+          ${q.status==='completed' ? `
+            <button class="btn btn-sm btn-success" onclick="openCheckInModal('${q.id}')">✅ 再次打卡</button>
+            <button class="btn btn-sm" onclick="openQuestForm('${q.id}')">✏️ 编辑</button>
+            <button class="btn btn-sm" onclick="viewQuestMemories('${q.id}')">📖 查看回忆</button>
+          ` : ''}
+          ${q.status==='archived' ? `
+            <button class="btn btn-sm" onclick="restoreQuest('${q.id}')">🔄 恢复到进行中</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteQuest('${q.id}')">🗑️ 删除</button>
+          ` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  return `
+  <div class="section-title">📔 支线图鉴</div>
+  <div class="section-subtitle">浏览和管理你所有的人生支线任务</div>
+  <div class="filter-bar">${filterHTML}</div>
+  <div class="quest-grid">${cardsHTML}</div>
+  `;
+}
+
+// --- 成就勋章墙 ---
+function renderAchievements() {
+  const quests = getQuests();
+  const settings = getSettings();
+  const seriesNames = [...new Set(ACHIEVEMENTS.map(a=>a.series))];
+
+  let html = `<div class="section-title">🏅 成就勋章墙</div>`;
+  html += `<div class="section-subtitle">每一次达成，都值得被标记</div>`;
+
+  seriesNames.forEach(series=>{
+    const items = ACHIEVEMENTS.filter(a=>a.series===series);
+    html += `<div class="achievement-series"><h4>${series}</h4><div class="achievement-grid">`;
+    items.forEach(a=>{
+      const unlocked = a.check(quests, settings);
+      const cls = unlocked ? 'unlocked' : 'locked';
+      html += `<div class="achievement-item ${cls}">
+        <span class="achievement-icon">${a.icon}</span>
+        <div class="achievement-name">${unlocked ? '✨ ' : ''}${a.name}</div>
+        <div class="achievement-cond">${a.cond}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  return html;
+}
+
+// --- 时光回忆录 ---
+function renderTimeline(filterType) {
+  const ft = filterType || 'all';
+  const quests = getQuests();
+  const allCheckIns = [];
+  quests.forEach(q=>{
+    if (q.checkIns && q.checkIns.length > 0) {
+      q.checkIns.forEach(ci=>{
+        allCheckIns.push({ ...ci, questId:q.id, questName:q.name, category:q.category });
+      });
+    }
+  });
+  allCheckIns.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  let filtered = allCheckIns;
+  if (ft === 'thisyear') filtered = allCheckIns.filter(ci=>isThisYear(ci.date));
+  else if (ft !== 'all') filtered = allCheckIns.filter(ci=>ci.category===ft);
+
+  const filters = [
+    {key:'all',label:'全部'},
+    {key:'thisyear',label:'今年'},
+    {key:'food',label:'美食'},
+    {key:'experience',label:'独行'},
+    {key:'healing',label:'治愈'},
+  ];
+
+  let filterHTML = filters.map(f=>{
+    const active = ft===f.key ? ' active' : '';
+    return `<button class="filter-btn${active}" onclick="renderTimelineView('${f.key}')">${f.label}</button>`;
+  }).join('');
+
+  let timelineHTML = '';
+  if (filtered.length === 0) {
+    timelineHTML = `<div class="empty-state"><span class="empty-icon">📖</span><p>还没有完成记录，去打卡第一条支线吧</p></div>`;
+  } else {
+    timelineHTML = filtered.map(ci=>`
+      <div class="timeline-item">
+        <div class="timeline-date">${formatDate(ci.date)}</div>
+        <div class="timeline-content">
+          <div class="tl-name">${categoryIcon(ci.category)} ${escHtml(ci.questName)}</div>
+          ${ci.notes ? `<div class="tl-notes">"${escHtml(ci.notes)}"</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  return `
+  <div class="section-title">📖 我的人生冒险编年史</div>
+  <div class="section-subtitle">按日期回溯每一段被好好记录的支线</div>
+  <div class="filter-bar">${filterHTML}</div>
+  <div class="timeline">${timelineHTML}</div>
+  `;
+}
+function renderTimelineView(filterType) {
+  document.getElementById('mainContent').innerHTML = renderTimeline(filterType);
+}
+
+// --- 随机新支线 ---
+function renderRandom() {
+  return `
+  <div class="section-title">🎪 随机新支线</div>
+  <div class="section-subtitle">不知道做什么？交给命运吧</div>
+  <div class="random-section">
+    <button class="random-btn" id="randomBtn" onclick="spinRandom()">🎲 抽取随机支线</button>
+    <div id="randomResult"></div>
+  </div>
+  <div class="gentle-tip">💚 微小的小事，也值得被认真存档记录</div>
+  `;
+}
+
+function spinRandom() {
+  const btn = document.getElementById('randomBtn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+
+  setTimeout(()=>{
+    const idx = Math.floor(Math.random()*RANDOM_QUESTS.length);
+    const suggestion = RANDOM_QUESTS[idx];
+    document.getElementById('randomResult').innerHTML = `
+      <div class="random-result card" style="text-align:center;margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto;">
+        <div class="result-quest">${escHtml(suggestion)}</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">—— 试试看？</p>
+        <button class="btn btn-primary btn-sm" onclick="addRandomQuest('${escAttr(suggestion)}')">➕ 添加到我的支线</button>
+      </div>`;
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+  }, 650);
+}
+
+function addRandomQuest(name) {
+  openQuestForm(null, name);
+}
+
+// --- 存档备份 ---
+function renderBackup() {
+  const settings = getSettings();
+  const quests = getQuests();
+  const completed = countCompleted(quests);
+
+  // 计算年度数据
+  const cats = ['skill','experience','food','healing','challenge','bond'];
+  const catCounts = {};
+  cats.forEach(c=>{ catCounts[c] = countCompletedByCat(quests,c); });
+  const topCat = cats.reduce((a,b)=>catCounts[a]>catCounts[b]?a:b);
+  const year = new Date().getFullYear();
+
+  return `
+  <div class="section-title">💾 存档备份</div>
+  <div class="section-subtitle">你的冒险数据，值得安全保存</div>
+
+  <div class="backup-grid">
+    <div class="card backup-card">
+      <span class="backup-icon">📥</span>
+      <h4>导出完整存档</h4>
+      <p>下载 JSON 文件，包含全部支线和打卡记录</p>
+      <button class="btn btn-primary" onclick="exportBackup()">💾 导出备份文件</button>
+    </div>
+    <div class="card backup-card">
+      <span class="backup-icon">📤</span>
+      <h4>导入存档恢复</h4>
+      <p>从之前导出的备份文件恢复数据</p>
+      <button class="btn" onclick="importBackup()">📂 选择备份文件</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
+    </div>
+    <div class="card backup-card">
+      <span class="backup-icon">⚠️</span>
+      <h4>清空全部数据</h4>
+      <p>危险操作，清空所有支线和记录</p>
+      <button class="btn btn-danger" onclick="clearAllData()">🗑️ 清空数据</button>
+    </div>
+  </div>
+
+  <div class="annual-report">
+    <div class="section-title" style="margin-top:28px;">📄 年度报告书</div>
+    <div class="report-preview">
+      <h3>我的 ${year} 年度支线冒险报告</h3>
+      <div class="report-stat"><span class="stat-label">今年解锁总支线数量</span><span class="stat-value">${quests.filter(q=>q.status==='completed'&&isThisYear(q.completedAt)).length}</span></div>
+      <div class="report-stat"><span class="stat-label">完成最多的支线类型</span><span class="stat-value">${categoryLabel(topCat)}</span></div>
+      <div class="report-stat"><span class="stat-label">累计完成支线</span><span class="stat-value">${completed}</span></div>
+      <div class="report-stat"><span class="stat-label">已解锁成就勋章</span><span class="stat-value">${ACHIEVEMENTS.filter(a=>a.check(quests,settings)).length} / ${ACHIEVEMENTS.length}</span></div>
+      <div class="report-stat"><span class="stat-label">进行中待解锁</span><span class="stat-value">${countActive(quests)}</span></div>
+      <div class="report-ending">不必追赶任何人，你的节奏刚刚好</div>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn btn-primary" onclick="exportAnnualReport()">📄 导出年度报告书</button>
+    </div>
+  </div>
+  `;
+}
+
+// ============ 操作函数 ============
+
+function saveAndRefresh(fn) {
+  fn();
+  saveQuests(state.quests);
+  saveSettings(state.settings);
+  renderView(state.currentView);
+}
+
+// 新建/编辑支线表单
+function openQuestForm(questId, presetName) {
+  const quests = getQuests();
+  let quest = null;
+  if (questId) quest = quests.find(q=>q.id===questId);
+  const isEdit = !!quest;
+  const nameVal = escAttr(presetName || (quest ? quest.name : ''));
+  const descVal = escAttr(quest ? (quest.description||'') : '');
+  const diffVal = quest ? quest.difficulty : 3;
+  const seasonVal = quest ? quest.season : 'any';
+  const budgetVal = quest ? quest.budget : '';
+  const repeatVal = quest ? quest.repeatCycle : 'once';
+  const tagsVal = quest ? quest.tags : [];
+  const catVal = quest ? quest.category : 'experience';
+
+  const predefinedTags = ['冒险','治愈','省钱','双人','独处','技能','美食','挑战'];
+
+  const cats = [
+    {v:'skill',l:'🪄 技能支线·成长副本'},
+    {v:'experience',l:'🎪 体验支线·奇遇地图'},
+    {v:'food',l:'🍰 美食支线·味蕾图鉴'},
+    {v:'healing',l:'🧸 治愈支线·休憩副本'},
+    {v:'challenge',l:'💪 挑战支线·勇者试炼'},
+    {v:'bond',l:'💕 羁绊支线·同行任务'},
+  ];
+
+  let tagsHTML = predefinedTags.map(t=>{
+    const sel = tagsVal.includes(t) ? ' selected' : '';
+    return `<button class="tag-option${sel}" onclick="toggleFormTag(this,'${t}')" type="button">#${t}</button>`;
+  }).join('');
+
+  let starsHTML = '';
+  for (let i=1;i<=5;i++) {
+    const active = i<=diffVal ? ' active' : '';
+    starsHTML += `<button class="star-btn${active}" onclick="setFormDifficulty(${i})" type="button">★</button>`;
+  }
+
+  const html = `
+  <div style="position:relative">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>${isEdit ? '✏️ 编辑支线' : '➕ 新建支线任务'}</h3>
+    <div class="form-group">
+      <label>支线名称</label>
+      <input type="text" id="formName" value="${nameVal}" placeholder="输入你想完成的小事/目标">
+    </div>
+    <div class="form-group">
+      <label>分类</label>
+      <select id="formCategory">${cats.map(c=>`<option value="${c.v}" ${c.v===catVal?'selected':''}>${c.l}</option>`).join('')}</select>
+    </div>
+    <div class="form-group">
+      <label>难度星级：1星轻松 ｜ 5星高难度长期任务</label>
+      <div class="star-select" id="formStars" data-difficulty="${diffVal}">${starsHTML}</div>
+    </div>
+    <div class="form-group">
+      <label>适合季节</label>
+      <select id="formSeason">
+        <option value="spring" ${seasonVal==='spring'?'selected':''}>🌸 春</option>
+        <option value="summer" ${seasonVal==='summer'?'selected':''}>☀️ 夏</option>
+        <option value="autumn" ${seasonVal==='autumn'?'selected':''}>🍂 秋</option>
+        <option value="winter" ${seasonVal==='winter'?'selected':''}>❄️ 冬</option>
+        <option value="any" ${seasonVal==='any'?'selected':''}>全年不限</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>预算备注（可选）</label>
+      <select id="formBudget">
+        <option value="">不填写</option>
+        <option value="free" ${budgetVal==='free'?'selected':''}>无花费</option>
+        <option value="small" ${budgetVal==='small'?'selected':''}>小额</option>
+        <option value="large" ${budgetVal==='large'?'selected':''}>大额存钱计划</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>标签自定义：冒险/治愈/省钱/双人/独处</label>
+      <div class="tag-select" id="formTags">${tagsHTML}</div>
+    </div>
+    <div class="form-group">
+      <label>任务描述</label>
+      <textarea id="formDesc" placeholder="简单记录你期待这件事的理由">${descVal}</textarea>
+    </div>
+    <div class="form-group">
+      <label>重复周期（可选）</label>
+      <select id="formRepeat">
+        <option value="once" ${repeatVal==='once'?'selected':''}>一次性支线</option>
+        <option value="weekly" ${repeatVal==='weekly'?'selected':''}>每周循环</option>
+        <option value="yearly" ${repeatVal==='yearly'?'selected':''}>每年打卡</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveQuest('${questId||''}')">${isEdit ? '💾 保存修改' : '➕ 创建支线'}</button>
+    </div>
+  </div>`;
+
+  showModal(html);
+}
+
+function toggleFormTag(el, tag) {
+  el.classList.toggle('selected');
+}
+function setFormDifficulty(n) {
+  const container = document.getElementById('formStars');
+  if (container) container.setAttribute('data-difficulty', n);
+  document.querySelectorAll('#formStars .star-btn').forEach((b,i)=>{
+    b.classList.toggle('active', i<n);
+  });
+}
+
+function saveQuest(questId) {
+  const name = document.getElementById('formName').value.trim();
+  if (!name) { alert('请输入支线名称'); return; }
+  const category = document.getElementById('formCategory').value;
+  const difficulty = parseInt(document.getElementById('formStars').getAttribute('data-difficulty')||'3');
+  const season = document.getElementById('formSeason').value;
+  const budget = document.getElementById('formBudget').value;
+  const description = document.getElementById('formDesc').value.trim();
+  const repeatCycle = document.getElementById('formRepeat').value;
+  const tags = [];
+  document.querySelectorAll('#formTags .tag-option.selected').forEach(el=>{
+    tags.push(el.textContent.replace('#',''));
+  });
+
+  const quests = getQuests();
+  if (questId) {
+    const q = quests.find(q=>q.id===questId);
+    if (q) {
+      q.name = name; q.category = category; q.difficulty = difficulty;
+      q.season = season; q.budget = budget; q.description = description;
+      q.repeatCycle = repeatCycle; q.tags = tags; q.isPrepopulated = false;
+    }
+  } else {
+    quests.push({
+      id: uid(), name, category, difficulty, season, budget, description,
+      repeatCycle, tags, status:'active', createdAt: new Date().toISOString(),
+      completedAt: null, checkIns:[], isPrepopulated:false,
+    });
+  }
+
+  saveAndRefresh(()=>{ state.quests = quests; });
+  closeModal();
+}
+
+// 打卡完成
+function openCheckInModal(questId) {
+  const quest = getQuests().find(q=>q.id===questId);
+  if (!quest) return;
+  const html = `
+  <div style="position:relative">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>🎉 恭喜解锁这条支线！</h3>
+    <p style="text-align:center;font-size:15px;color:var(--accent-main);margin-bottom:16px;">${escHtml(quest.name)}</p>
+    <div class="form-group">
+      <label>写下完成后的感悟、碎碎念、心情</label>
+      <textarea id="checkinNotes" placeholder="今天的心情、想说的话..."></textarea>
+    </div>
+    <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">这段记忆会永久存入你的时光回忆录</p>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-success" onclick="confirmCheckIn('${questId}')">✅ 确认打卡</button>
+    </div>
+  </div>`;
+  showModal(html);
+}
+
+function confirmCheckIn(questId) {
+  const notes = document.getElementById('checkinNotes').value.trim();
+  const quests = getQuests();
+  const q = quests.find(q=>q.id===questId);
+  if (!q) return;
+  q.status = 'completed';
+  q.completedAt = new Date().toISOString();
+  if (!q.checkIns) q.checkIns = [];
+  q.checkIns.push({ date: new Date().toISOString(), notes: notes || '' });
+  saveAndRefresh(()=>{ state.quests = quests; });
+  closeModal();
+  // 检测新成就
+  const settings = getSettings();
+  const newAch = ACHIEVEMENTS.filter(a=>a.check(quests,settings));
+  if (newAch.length > 0) {
+    setTimeout(()=>alert('🏅 恭喜！你解锁了新的成就勋章！\n去成就勋章墙看看吧～'), 500);
+  }
+}
+
+// 一键打卡：随机选一条进行中的支线打卡
+function quickCheckIn() {
+  const active = getQuests().filter(q=>q.status==='active');
+  if (active.length === 0) { alert('没有进行中的支线，先去图鉴创建一些吧！'); return; }
+  const q = active[Math.floor(Math.random()*active.length)];
+  openCheckInModal(q.id);
+}
+
+// 移至遗憾存档
+function archiveQuest(questId) {
+  if (!confirm('确定将这条支线移至遗憾存档区吗？\n\n有些支线暂时搁浅，也值得温柔收藏。')) return;
+  const quests = getQuests();
+  const q = quests.find(q=>q.id===questId);
+  if (q) q.status = 'archived';
+  saveAndRefresh(()=>{ state.quests = quests; });
+}
+
+// 从存档恢复
+function restoreQuest(questId) {
+  const quests = getQuests();
+  const q = quests.find(q=>q.id===questId);
+  if (q) q.status = 'active';
+  saveAndRefresh(()=>{ state.quests = quests; });
+}
+
+// 删除支线
+function deleteQuest(questId) {
+  if (!confirm('确定永久删除这条支线吗？此操作不可撤销。')) return;
+  const quests = getQuests();
+  state.quests = quests.filter(q=>q.id!==questId);
+  saveAndRefresh(()=>{});
+}
+
+// 查看回忆
+function viewQuestMemories(questId) {
+  const quest = getQuests().find(q=>q.id===questId);
+  if (!quest || !quest.checkIns || quest.checkIns.length===0) {
+    alert('这条支线还没有打卡记录');
+    return;
+  }
+  let memHTML = quest.checkIns.map((ci,i)=>{
+    return `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--accent-sub);margin-bottom:4px;">#${i+1} · ${formatDate(ci.date)}</div>
+      ${ci.notes ? `<div style="font-size:13px;color:var(--text-secondary);line-height:1.5">${escHtml(ci.notes)}</div>` : '<div style="font-size:12px;color:var(--text-muted)">无文字记录</div>'}
+    </div>`;
+  }).join('');
+
+  const html = `
+  <div style="position:relative">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>📖 ${escHtml(quest.name)} 的回忆</h3>
+    <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-bottom:12px;">共 ${quest.checkIns.length} 次打卡记录</p>
+    ${memHTML}
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">关闭</button>
+    </div>
+  </div>`;
+  showModal(html);
+}
+
+// 导出备份
+function exportBackup() {
+  const data = { quests: state.quests, settings: state.settings, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `lifeside_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 导入备份
+function importBackup() {
+  document.getElementById('importFileInput').click();
+}
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.quests || !Array.isArray(data.quests)) throw new Error('无效的备份文件');
+      if (!confirm(`即将导入 ${data.quests.length} 条支线数据，当前数据将被覆盖，确认继续？`)) return;
+      state.quests = data.quests;
+      if (data.settings) state.settings = data.settings;
+      saveAndRefresh(()=>{});
+      alert('✅ 存档导入成功！');
+    } catch(err) {
+      alert('❌ 文件格式错误，请选择正确的备份文件');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// 导出年度报告（精美 HTML 画册）
+function exportAnnualReport() {
+  const quests = getQuests();
+  const settings = getSettings();
+  settings.reportExports = (settings.reportExports||0) + 1;
+  saveSettings(settings);
+  state.settings = settings;
+
+  const year = new Date().getFullYear();
+  const completed = countCompleted(quests);
+  const thisYearCompleted = quests.filter(q=>q.status==='completed'&&isThisYear(q.completedAt)).length;
+  const active = countActive(quests);
+  const achievementCount = ACHIEVEMENTS.filter(a=>a.check(quests,settings)).length;
+
+  // 分类统计
+  const cats = ['skill','experience','food','healing','challenge','bond'];
+  const catCounts = {};
+  cats.forEach(c=>{ catCounts[c] = countCompletedByCat(quests,c); });
+  const topCat = cats.reduce((a,b)=>catCounts[a]>catCounts[b]?a:b);
+
+  // Top 回忆
+  const allCheckIns = [];
+  quests.forEach(q=>{
+    if (q.checkIns) q.checkIns.forEach(ci=>allCheckIns.push({...ci, questName:q.name, category:q.category}));
+  });
+  allCheckIns.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const top3 = allCheckIns.filter(ci=>ci.notes).slice(0,3);
+
+  // 待解锁
+  const pendingQuests = quests.filter(q=>q.status==='active').slice(0,5);
+
+  // 已解锁勋章
+  const unlockedAchievements = ACHIEVEMENTS.filter(a=>a.check(quests,settings));
+
+  const difficultyStarsHTML = (n) => '★'.repeat(n) + '☆'.repeat(5-n);
+
+  const reportHTML = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>我的${year}年度支线冒险报告 — 人生支线事务所</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;background:#fef5f0;color:#5c5252;line-height:1.8;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(255,181,194,.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 60%,rgba(184,169,232,.08) 0%,transparent 55%),radial-gradient(ellipse at 50% 90%,rgba(126,203,161,.08) 0%,transparent 50%);pointer-events:none;z-index:0}
+.container{max-width:680px;margin:0 auto;padding:40px 20px 60px;position:relative;z-index:1}
+/* 封面 */
+.cover{text-align:center;padding:48px 20px 40px;border-bottom:2px dashed #f0d8d8;margin-bottom:36px}
+.cover-icon{font-size:64px;display:block;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.cover h1{font-size:28px;color:#ff9a9e;font-weight:800;letter-spacing:2px;margin-bottom:8px}
+.cover .sub{font-size:14px;color:#c4b5b5}
+/* 板块 */
+.section{margin-bottom:32px}
+.section-title{font-size:20px;color:#ff9a9e;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+/* 数据卡片 */
+.stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.stat-card{flex:1;min-width:120px;background:#fff;border:1px solid #f0d8d8;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 12px rgba(255,154,158,.06)}
+.stat-card .num{font-size:32px;font-weight:800;color:#ff9a9e}
+.stat-card .label{font-size:12px;color:#c4b5b5;margin-top:4px}
+/* 记录卡片 */
+.memory-card{background:#fff;border:1px solid #f0d8d8;border-radius:14px;padding:18px 20px;margin-bottom:12px;box-shadow:0 2px 12px rgba(255,154,158,.05)}
+.memory-card .m-title{font-size:15px;font-weight:700;color:#5c5252;margin-bottom:6px}
+.memory-card .m-date{font-size:11px;color:#c4b5b5;margin-bottom:8px}
+.memory-card .m-note{font-size:13px;color:#998b8b;font-style:italic;line-height:1.7}
+/* 勋章 */
+.badge-row{display:flex;flex-wrap:wrap;gap:8px}
+.badge-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:6px 14px;background:rgba(255,154,158,.1);border:1px solid rgba(255,154,158,.2);border-radius:20px;color:#ff9a9e;font-weight:600}
+/* 待办清单 */
+.todo-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;color:#5c5252}
+.todo-item .check{width:18px;height:18px;border:2px solid #f0d8d8;border-radius:50%;flex-shrink:0}
+/* 结尾 */
+.footer{text-align:center;padding:32px 20px;border-top:2px dashed #f0d8d8;margin-top:36px}
+.footer .big{font-size:24px;color:#ff9a9e;font-weight:800;margin-bottom:6px}
+.footer .sub{font-size:13px;color:#c4b5b5}
+/* 进度条 */
+.bar-wrap{background:#fef5f0;border-radius:10px;height:10px;margin:8px 0 16px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#ff9a9e,#fda085);border-radius:10px;transition:width 1s ease}
+/* 打印 */
+@media print{body{background:#fff}body::before{display:none}.container{padding:20px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 封面 -->
+  <div class="cover">
+    <span class="cover-icon">📒</span>
+    <h1>我的${year}年度支线冒险报告</h1>
+    <p class="sub">人生支线事务所 · 年度回顾</p>
+  </div>
+
+  <!-- 总览数据 -->
+  <div class="section">
+    <div class="section-title">📊 今年解锁数据</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="num">${thisYearCompleted}</div><div class="label">今年完成</div></div>
+      <div class="stat-card"><div class="num">${completed}</div><div class="label">累计完成</div></div>
+      <div class="stat-card"><div class="num">${active}</div><div class="label">进行中</div></div>
+      <div class="stat-card"><div class="num">${achievementCount}/${ACHIEVEMENTS.length}</div><div class="label">已解锁勋章</div></div>
+    </div>
+  </div>
+
+  <!-- 完成最多的类型 -->
+  <div class="section">
+    <div class="section-title">🏆 最活跃的支线类型</div>
+    <div style="background:#fff;border:1px solid #f0d8d8;border-radius:14px;padding:18px 20px;box-shadow:0 2px 12px rgba(255,154,158,.05)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:28px">${categoryIcon(topCat)}</span>
+        <span style="font-size:16px;font-weight:700">${categoryLabel(topCat)}</span>
+        <span style="font-size:13px;color:#998b8b">· ${catCounts[topCat]} 条完成</span>
+      </div>
+      ${cats.map(c=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-size:13px;color:#5c5252;min-width:50px">${categoryIcon(c)} ${categoryLabel(c)}</span>
+        <div class="bar-wrap" style="flex:1;margin:0"><div class="bar-fill" style="width:${Math.max(2,Math.round(catCounts[c]/Math.max(1,completed)*100))}%"></div></div>
+        <span style="font-size:11px;color:#c4b5b5;min-width:24px">${catCounts[c]}</span>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- 最难忘的奇遇 -->
+  <div class="section">
+    <div class="section-title">💫 最难忘的奇遇记录</div>
+    ${top3.length === 0 ? '<p style="color:#c4b5b5;font-size:14px">暂未留下文字记录，去打卡第一条支线吧~</p>' :
+    top3.map((ci,i)=>`
+    <div class="memory-card">
+      <div class="m-title">${i+1}. ${escHtml(ci.questName)} ${categoryIcon(ci.category)}</div>
+      <div class="m-date">${formatDate(ci.date)}</div>
+      <div class="m-note">"${escHtml(ci.notes)}"</div>
+    </div>`).join('')}
+  </div>
+
+  <!-- 已解锁勋章 -->
+  <div class="section">
+    <div class="section-title">🌟 已解锁成就勋章</div>
+    ${unlockedAchievements.length === 0 ? '<p style="color:#c4b5b5;font-size:14px">还没有解锁任何勋章，继续加油！</p>' :
+    `<div class="badge-row">${unlockedAchievements.map(a=>`<span class="badge-chip">${a.icon} ${a.name}</span>`).join('')}</div>`}
+  </div>
+
+  <!-- 明年待开启 -->
+  <div class="section">
+    <div class="section-title">🎯 明年待开启的新支线</div>
+    ${pendingQuests.length === 0 ? '<p style="color:#c4b5b5;font-size:14px">暂时没有待解锁支线，去创建一些吧！</p>' :
+    pendingQuests.map((q,i)=>`
+    <div class="todo-item">
+      <div class="check"></div>
+      <span>${escHtml(q.name)}</span>
+      <span style="font-size:10px;color:#c4b5b5;margin-left:auto">${difficultyStarsHTML(q.difficulty||1)}</span>
+    </div>`).join('')}
+  </div>
+
+  <!-- 结尾 -->
+  <div class="footer">
+    <div class="big">不必追赶任何人</div>
+    <p class="sub">你的节奏刚刚好 ✨</p>
+    <p style="font-size:11px;color:#e0d0d0;margin-top:12px">人生支线事务所 · 导出于 ${new Date().toLocaleDateString('zh-CN')}</p>
+  </div>
+
+</div>
+</body>
+</html>`;
+
+  const blob = new Blob([reportHTML], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+
+  if (state.currentView === 'backup') renderView('backup');
+}
+
+// 清空数据
+function clearAllData() {
+  if (!confirm('⚠️ 确定要清空全部数据吗？\n\n此操作不可撤销，所有支线和打卡记录将被永久删除。')) return;
+  if (!confirm('再次确认：真的要清空所有数据吗？')) return;
+  localStorage.removeItem(LS_KEY_QUESTS);
+  localStorage.removeItem(LS_KEY_SETTINGS);
+  refreshData();
+  renderView(state.currentView);
+  alert('✅ 全部数据已清空');
+}
+
+// ============ 模态框 ============
+function showModal(html) {
+  document.getElementById('modalOverlay').classList.remove('hidden');
+  document.getElementById('modalContent').innerHTML = html;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.add('hidden');
+}
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ============ HTML 转义 ============
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============ 事件绑定 ============
+document.addEventListener('DOMContentLoaded', function() {
+  // 导航
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.addEventListener('click', function() {
+      showView(this.getAttribute('data-view'));
+    });
+  });
+
+  // FAB
+  document.getElementById('fabAdd').addEventListener('click', function() {
+    openQuestForm();
+  });
+
+  // 汉堡菜单
+  const hamburger = document.getElementById('hamburger');
+  const nav = document.getElementById('nav');
+  hamburger.addEventListener('click', function() {
+    nav.classList.toggle('open');
+    hamburger.textContent = nav.classList.contains('open') ? '✕' : '☰';
+  });
+  // 移动端点击导航项后关闭菜单
+  nav.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.addEventListener('click', function() {
+      if (window.innerWidth <= 768) {
+        nav.classList.remove('open');
+        hamburger.textContent = '☰';
+      }
+    });
+  });
+
+  // 键盘关闭弹窗
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // 初始化
+  refreshData();
+  showView('home');
+});
+
+// 暴露必要函数到全局
+window.openQuestForm = openQuestForm;
+window.openCheckInModal = openCheckInModal;
+window.archiveQuest = archiveQuest;
+window.restoreQuest = restoreQuest;
+window.deleteQuest = deleteQuest;
+window.viewQuestMemories = viewQuestMemories;
+window.quickCheckIn = quickCheckIn;
+window.exportBackup = exportBackup;
+window.importBackup = importBackup;
+window.handleImport = handleImport;
+window.exportAnnualReport = exportAnnualReport;
+window.clearAllData = clearAllData;
+window.closeModal = closeModal;
+window.confirmCheckIn = confirmCheckIn;
+window.saveQuest = saveQuest;
+window.showView = showView;
+window.spinRandom = spinRandom;
+window.addRandomQuest = addRandomQuest;
+window.renderView = renderView;
+window.renderTimelineView = renderTimelineView;
+window.toggleFormTag = toggleFormTag;
+window.setFormDifficulty = setFormDifficulty;
+window.state = state;
+</script>
+
+</body>
+</html>
