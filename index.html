@@ -354,6 +354,20 @@ body::before {
 .random-result { animation: resultPop 0.4s ease; }
 @keyframes resultPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
 .random-result .result-quest { font-size:18px; font-weight:700; margin-bottom:8px; color:var(--accent-main); }
+.random-pool { margin-top:28px; padding-top:20px; border-top:1px dashed var(--border); }
+.random-pool .pool-title { font-size:13px; color:var(--text-secondary); margin-bottom:12px; }
+.random-pool .pool-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.random-pool .pool-cat {
+  display:flex; align-items:center; gap:6px; padding:10px 12px;
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--bg-card); font-size:12px;
+}
+.random-pool .pool-cat-icon { font-size:16px; }
+.random-pool .pool-cat-name { flex:1; color:var(--text-primary); font-weight:500; }
+.random-pool .pool-cat-count { color:var(--text-muted); font-size:11px; }
+@media (max-width:640px) {
+  .random-pool .pool-grid { grid-template-columns:repeat(2,1fr); }
+}
 
 /* ===== 存档备份 ===== */
 .backup-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
@@ -575,23 +589,129 @@ const PREPOPULATED_QUESTS = [
   { name:'和伴侣打卡美食', category:'bond', difficulty:2, season:'any', budget:'small', tags:['双人','美食'], description:'两个人一起去探索好吃的地方', repeatCycle:'once', difficulty:2 },
 ];
 
-// 随机支线库
+// 随机支线库（110条，按分类打标：skill/experience/food/healing/challenge/bond）
 const RANDOM_QUESTS = [
-  '找一个晴天出门散步，不带手机很久',
-  '尝试一道从没做过的家常菜',
-  '傍晚出门看一次日落',
-  '整理房间，给自己打造舒适小角落',
-  '给很久没联系的好友发一段暖心消息',
-  '安静读完半本书，不刷手机',
-  '尝试一款全新饮品',
-  '学一首自己喜欢的外语歌曲',
-  '给明天的自己写一张明信片',
-  '把手机调成黑白模式过一天',
-  '去花市买一束鲜花放在书桌上',
-  '用纸笔写一篇日记，记录今天的感受',
-  '清理手机里半年没用过的App',
-  '尝试冥想或正念呼吸10分钟',
-  '逛一家从未进过的小店',
+  // ===== 技能支线 · 成长副本 (19) =====
+  {t:'学会做一道完整的早餐，好好摆盘再吃', c:'skill'},
+  {t:'学会用手机拍出好看的照片，研究一下构图和光线', c:'skill'},
+  {t:'学会三道拿手家常菜，能随时端上桌', c:'skill'},
+  {t:'学会基础视频剪辑，剪一条1分钟的生活vlog', c:'skill'},
+  {t:'学会一种泳姿，能在水里自在游50米', c:'skill'},
+  {t:'学会心肺复苏和AED的使用方法', c:'skill'},
+  {t:'学会包饺子，从和面、调馅开始', c:'skill'},
+  {t:'学会一项手工艺：编织、陶艺或木工都好', c:'skill'},
+  {t:'学会盲打，打字不再低头看键盘', c:'skill'},
+  {t:'学会给电脑重装系统并装好常用软件', c:'skill'},
+  {t:'学会用Excel做一张漂亮的图表和数据看板', c:'skill'},
+  {t:'学会一种乐器的入门曲，弹完整首', c:'skill'},
+  {t:'学会简单的缝纫，自己缝好一颗扣子', c:'skill'},
+  {t:'学会画一幅简单的水彩画', c:'skill'},
+  {t:'学会调一杯鸡尾酒或特调饮品', c:'skill'},
+  {t:'学会记账理财，认真坚持一个月', c:'skill'},
+  {t:'学会一道家人的招牌菜，复刻出那个味道', c:'skill'},
+  {t:'学一首自己喜欢的外语歌曲，唱到顺畅', c:'skill'},
+  {t:'学会拍剪一条完整的旅行记录短片', c:'skill'},
+
+  // ===== 体验支线 · 奇遇地图 (21) =====
+  {t:'独自去看一次海，什么都不做地待着', c:'experience'},
+  {t:'深夜到郊外看一次星星', c:'experience'},
+  {t:'看一场线下演唱会或音乐节', c:'experience'},
+  {t:'来一次说走就走的短途独行', c:'experience'},
+  {t:'在山顶看一次日出', c:'experience'},
+  {t:'傍晚出门看一次日落', c:'experience'},
+  {t:'找一个晴天出门散步，不带手机很久', c:'experience'},
+  {t:'逛一家从未进过的小店', c:'experience'},
+  {t:'去城市里从没去过的街区走一走', c:'experience'},
+  {t:'坐一趟没坐过的公交线路，一直坐到终点', c:'experience'},
+  {t:'看一次现场话剧或脱口秀', c:'experience'},
+  {t:'去美术馆或博物馆，认真看完一个展', c:'experience'},
+  {t:'独自去咖啡馆待一个下午', c:'experience'},
+  {t:'看一场凌晨首映的电影', c:'experience'},
+  {t:'去花市买一束鲜花放在书桌上', c:'experience'},
+  {t:'在雨天不打伞散步十分钟', c:'experience'},
+  {t:'去当地最高的地方俯瞰整座城市', c:'experience'},
+  {t:'认真看完一次烟花', c:'experience'},
+  {t:'停下来听完一次街头艺人的演唱', c:'experience'},
+  {t:'泡一次温泉或汤泉，泡到手指发皱', c:'experience'},
+  {t:'去一个有山或有海的陌生小城过周末', c:'experience'},
+
+  // ===== 美食支线 · 味蕾图鉴 (18) =====
+  {t:'尝试一道从没做过的家常菜', c:'food'},
+  {t:'自己动手做一次猪肚鸡', c:'food'},
+  {t:'打卡三家本地小众小吃店', c:'food'},
+  {t:'尝试一次完全陌生的异国料理', c:'food'},
+  {t:'亲手做一次甜品，不用预拌粉', c:'food'},
+  {t:'尝试一款全新饮品', c:'food'},
+  {t:'自己做一次手冲咖啡，认真称豆计时', c:'food'},
+  {t:'复刻一次在餐厅吃到惊艳的那道菜', c:'food'},
+  {t:'去菜市场买一样没见过的食材，把它做熟', c:'food'},
+  {t:'做一个生日蛋糕送给别人', c:'food'},
+  {t:'完成一周不重样的早餐挑战', c:'food'},
+  {t:'吃一次主厨发办，把菜单交给别人安排', c:'food'},
+  {t:'学做一道地方菜：川、粤、滇或西北风味', c:'food'},
+  {t:'打卡一家开了三十年的老店', c:'food'},
+  {t:'尝试一整天的纯素食', c:'food'},
+  {t:'自己做一次面包，从揉面开始', c:'food'},
+  {t:'搜罗城市里最好吃的五碗面', c:'food'},
+  {t:'做一桌菜请朋友来家里吃', c:'food'},
+
+  // ===== 治愈支线 · 休憩副本 (18) =====
+  {t:'完整读完一本书，不跳读不速读', c:'healing'},
+  {t:'养一盆绿植，照顾到它开花', c:'healing'},
+  {t:'撸猫一整天，或者去猫咖待一下午', c:'healing'},
+  {t:'泡一次热汤或热水澡，不赶时间', c:'healing'},
+  {t:'整理房间，给自己打造一个舒适小角落', c:'healing'},
+  {t:'安静读完半本书，全程不刷手机', c:'healing'},
+  {t:'用纸笔写一篇日记，记录今天的感受', c:'healing'},
+  {t:'尝试冥想或正念呼吸10分钟', c:'healing'},
+  {t:'早睡一次，23点前放下手机', c:'healing'},
+  {t:'清理手机里半年没用过的App', c:'healing'},
+  {t:'断网一整天，只做喜欢的事', c:'healing'},
+  {t:'做一次彻底的数字整理，清理相册和文件', c:'healing'},
+  {t:'给自己买一束花，不需要任何理由', c:'healing'},
+  {t:'睡到自然醒，不设闹钟', c:'healing'},
+  {t:'洗晒一次被子和枕头，晚上闻着太阳味入睡', c:'healing'},
+  {t:'做一次完整的拉伸或瑜伽', c:'healing'},
+  {t:'写下今天做成的三件小事', c:'healing'},
+  {t:'给明天的自己写一张明信片', c:'healing'},
+
+  // ===== 挑战支线 · 勇者试炼 (18) =====
+  {t:'完成一次5km慢跑', c:'challenge'},
+  {t:'当众发言一次，说出自己的想法', c:'challenge'},
+  {t:'独自看一次电影', c:'challenge'},
+  {t:'勇敢拒绝一次不想做的事', c:'challenge'},
+  {t:'把手机调成黑白模式过一天', c:'challenge'},
+  {t:'30天坚持每天走8000步', c:'challenge'},
+  {t:'一口气爬20层楼不休息', c:'challenge'},
+  {t:'独立完成一次搬家或大扫除', c:'challenge'},
+  {t:'尝试一整天不抱怨', c:'challenge'},
+  {t:'主动和陌生人搭话一次', c:'challenge'},
+  {t:'尝试一次冷水澡', c:'challenge'},
+  {t:'试着一天不喝奶茶或咖啡', c:'challenge'},
+  {t:'完成一次30天阅读打卡', c:'challenge'},
+  {t:'自己规划一次旅行并全程执行', c:'challenge'},
+  {t:'参加一次公开活动或比赛', c:'challenge'},
+  {t:'上台表演一次，唱、讲或演都算', c:'challenge'},
+  {t:'用一个月存下一笔心愿基金', c:'challenge'},
+  {t:'把一件一直拖着的事彻底做完', c:'challenge'},
+
+  // ===== 羁绊支线 · 同行任务 (16) =====
+  {t:'和闺蜜来一次短途旅行', c:'bond'},
+  {t:'给家人写一封手写的信', c:'bond'},
+  {t:'和伴侣打卡一家想去很久的餐厅', c:'bond'},
+  {t:'给很久没联系的好友发一段暖心消息', c:'bond'},
+  {t:'给父母做一顿饭', c:'bond'},
+  {t:'和朋友拍一组写真或合影', c:'bond'},
+  {t:'陪长辈逛一次他们喜欢的地方', c:'bond'},
+  {t:'给朋友准备一份手写贺卡和小礼物', c:'bond'},
+  {t:'和同伴一起完成一次拼图或密室逃脱', c:'bond'},
+  {t:'组织一次朋友聚餐，你来当主厨', c:'bond'},
+  {t:'陪家人看一次他们想看的演出', c:'bond'},
+  {t:'和朋友互换一天的推荐歌单', c:'bond'},
+  {t:'给同事或同学写一句真诚的感谢', c:'bond'},
+  {t:'和重要的人一起看一次日出', c:'bond'},
+  {t:'约一个好久不见的人喝杯咖啡', c:'bond'},
+  {t:'和家人一起翻老照片，听他们讲过去的事', c:'bond'},
 ];
 
 // 分类信息
@@ -981,14 +1101,30 @@ function renderTimelineView(filterType) {
 function renderRandom() {
   return `
   <div class="section-title">🎪 随机新支线</div>
-  <div class="section-subtitle">不知道做什么？交给命运吧</div>
+  <div class="section-subtitle">${RANDOM_QUESTS.length} 条灵感待抽取，已开启过的不会再抽到</div>
   <div class="random-section">
     <button class="random-btn" id="randomBtn" onclick="spinRandom()">🎲 抽取随机支线</button>
     <div id="randomResult"></div>
   </div>
+  <div class="random-pool">
+    <div class="pool-title">📚 灵感库全览</div>
+    <div class="pool-grid">
+      ${['skill','experience','food','healing','challenge','bond'].map(c=>{
+        const n = RANDOM_QUESTS.filter(q=>q.c===c).length;
+        const cat = CATEGORIES[c];
+        return `<div class="pool-cat" style="border-color:${cat.color}44;background:${cat.color}12">
+          <span class="pool-cat-icon">${cat.icon}</span>
+          <span class="pool-cat-name">${cat.name.split('·')[0]}</span>
+          <span class="pool-cat-count">${n} 条</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
   <div class="gentle-tip">💚 微小的小事，也值得被认真存档记录</div>
   `;
 }
+
+let lastRandomIdx = -1;
 
 function spinRandom() {
   const btn = document.getElementById('randomBtn');
@@ -996,21 +1132,48 @@ function spinRandom() {
   btn.disabled = true;
 
   setTimeout(()=>{
-    const idx = Math.floor(Math.random()*RANDOM_QUESTS.length);
-    const suggestion = RANDOM_QUESTS[idx];
+    const quests = getQuests();
+    const usedNames = new Set(quests.map(q=>(q.name||'').trim()));
+
+    // 过滤掉已经添加过的，避免抽到重复
+    let pool = RANDOM_QUESTS.map((item,i)=>({...item, i})).filter(x=>!usedNames.has(x.t));
+    let exhausted = false;
+
+    if (pool.length === 0) {
+      // 全部抽完，重置整个题库
+      pool = RANDOM_QUESTS.map((item,i)=>({...item, i}));
+      exhausted = true;
+    } else if (pool.length > 1) {
+      // 避免连抽到同一条
+      pool = pool.filter(x=>x.i !== lastRandomIdx);
+    }
+
+    const pick = pool[Math.floor(Math.random()*pool.length)];
+    lastRandomIdx = pick.i;
+
+    const cat = CATEGORIES[pick.c];
+    const left = exhausted ? RANDOM_QUESTS.length : pool.length;
+
     document.getElementById('randomResult').innerHTML = `
       <div class="random-result card" style="text-align:center;margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto;">
-        <div class="result-quest">${escHtml(suggestion)}</div>
+        <div style="display:inline-block;padding:3px 12px;border-radius:12px;font-size:11.5px;margin-bottom:10px;background:${cat.color}22;color:${cat.color};border:1px solid ${cat.color}44;">
+          ${cat.icon} ${cat.name}
+        </div>
+        <div class="result-quest">${escHtml(pick.t)}</div>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">—— 试试看？</p>
-        <button class="btn btn-primary btn-sm" onclick="addRandomQuest('${escAttr(suggestion)}')">➕ 添加到我的支线</button>
+        <button class="btn btn-primary btn-sm" onclick="addRandomQuest('${escAttr(pick.t)}','${pick.c}')">➕ 添加到我的支线</button>
+        <button class="btn btn-sm" style="margin-left:8px" onclick="spinRandom()">🎲 换一条</button>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:12px">
+          ${exhausted ? '✨ 题库已被你翻遍啦，重新洗牌开始新一轮' : `灵感库还剩 ${left} 条没开启过`}
+        </div>
       </div>`;
     btn.classList.remove('spinning');
     btn.disabled = false;
   }, 650);
 }
 
-function addRandomQuest(name) {
-  openQuestForm(null, name);
+function addRandomQuest(name, cat) {
+  openQuestForm(null, name, cat);
 }
 
 // --- 存档备份 ---
@@ -1080,7 +1243,7 @@ function saveAndRefresh(fn) {
 }
 
 // 新建/编辑支线表单
-function openQuestForm(questId, presetName) {
+function openQuestForm(questId, presetName, presetCat) {
   const quests = getQuests();
   let quest = null;
   if (questId) quest = quests.find(q=>q.id===questId);
@@ -1092,7 +1255,7 @@ function openQuestForm(questId, presetName) {
   const budgetVal = quest ? quest.budget : '';
   const repeatVal = quest ? quest.repeatCycle : 'once';
   const tagsVal = quest ? quest.tags : [];
-  const catVal = quest ? quest.category : 'experience';
+  const catVal = quest ? quest.category : (presetCat || 'experience');
 
   const predefinedTags = ['冒险','治愈','省钱','双人','独处','技能','美食','挑战'];
 
