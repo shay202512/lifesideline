@@ -249,6 +249,8 @@ body::before {
 .recommend-card .rec-label { font-size:11px; color:var(--accent-sub); font-weight:600; margin-bottom:4px; }
 .recommend-card .rec-text { font-size:15px; color:var(--text-primary); font-weight:600; }
 .recommend-card .rec-hint { font-size:11px; color:var(--text-muted); margin-top:6px; }
+.recommend-card .rec-action { margin-top:12px; }
+.recommend-card .rec-action .btn { width:100%; justify-content:center; padding:10px 18px; font-size:13.5px; }
 
 /* 快捷按钮 */
 .quick-actions { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
@@ -770,11 +772,17 @@ function renderHome() {
       <div class="rec-label">🎯 今日适合开启的小支线</div>
       <div class="rec-text">${categoryIcon(rec.category)} ${escHtml(rec.name)}</div>
       <div class="rec-hint">${difficultyStars(rec.difficulty)} · ${categoryLabel(rec.category)}</div>
+      <div class="rec-action">
+        <button class="btn btn-primary" onclick="openCheckInModal('${rec.id}')">🚀 一键开启</button>
+      </div>
     </div>`;
   } else {
     recHTML = `<div class="recommend-card">
       <div class="rec-label">🎯 今日推荐</div>
       <div class="rec-text" style="color:var(--text-secondary)">还没有进行中的支线，去图鉴里创建第一条吧！</div>
+      <div class="rec-action">
+        <button class="btn btn-primary" onclick="openQuestForm()">➕ 新建支线任务</button>
+      </div>
     </div>`;
   }
 
